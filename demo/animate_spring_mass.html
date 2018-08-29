@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>				
+		$(document).ready(function(){					
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			stage.frames = 0;
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			var scene = new JTopo.Scene();
+			stage.showToolbar = false;
+			scene.shadow = true;
+			scene.backgroundColor = '0,0,0';
+			scene.alpha = 1;
+			stage.add(scene);
+			
+			var nodes = [];
+			
+			function create_node(){
+				var x = Math.random() * stage.width;
+				var y = Math.random() * stage.height;
+				var node = new JTopo.CircleNode();
+				node.vx = Math.random() * 6 - 3;
+				node.vy = Math.random() * 6 - 3;
+				node.radius = Math.random() * 10 + 2;
+				node.mass = node.radius;
+				node.fillColor = JTopo.util.randomColor();
+				node.setLocation(x, y);
+				scene.add(node);
+				return node;
+			}
+			
+			for(var i=0; i<90; i++){
+				var node = create_node();
+				nodes.push(node);
+			}
+
+			function move(node){
+				node.x += node.vx;
+				node.y += node.vy;
+				if(node.x > stage.width){
+					node.x = 0;
+				}
+				if(node.y> stage.height){
+					node.y = 0;
+				}
+				if(node.x - node.width < 0){
+					node.x = stage.width;
+				}
+				if(node.y - node.height < 0){
+					node.y = stage.height;
+				}
+			}
+			
+			var minDist = 100;
+			var springAmount = 0.0025;
+			function spring(a, b){
+				var dx = b.x - a.x;
+				var dy = b.y - a.y;
+				var dist = JTopo.util.getDistance(a, b);
+				
+				if(dist < minDist){
+					var g = stage.graphics;
+					var alpha = 1 - dist / minDist;
+					g.beginPath();
+					g.strokeStyle = 'rgba(255,255,255,'+alpha+')';
+					g.lineWidth = 1;
+					g.moveTo(a.x + a.width/2, a.y + a.height/2);
+					g.lineTo(b.x + b.width/2, b.y + b.height/2);
+					g.stroke();
+					g.closePath();
+					var ax = dx * springAmount;
+					var ay = dy * springAmount;
+					a.x += ax / a.mass;
+					a.y += ay / a.mass;
+					b.x -= ax / b.mass;
+					b.y -= ay / b.mass;
+				}
+			}
+
+			(function f(){
+				stage.paint();
+				for(var i=0; i<nodes.length; i++){
+					for(var j=0; j<nodes.length; j++){
+						if(j == i) continue;
+						spring(nodes[i], nodes[j]);
+					}
+					move(nodes[i]);
+				}
+				
+				requestAnimationFrame(f);
+			})();
+			
+			stage.addEventListener('mouseup', function(e){
+				var node = create_node();
+				node.setLocation(e.x, e.y);
+				nodes.push(node);
+			});
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

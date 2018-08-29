@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">
+	
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>
+		$(document).ready(function(){
+			var canvas = document.getElementById('canvas');		
+
+			var str = ' stageObj = {frames:24, scenes:[{backgroundColor:"255,255,255",visible:true,mode:"normal",rotate:0,alpha:0,scaleX:1,scaleY:1,shadow:true,translateX:0,translateY:0,areaSelect:true,paintAll:false, elements:[{text:"from",elementType:"Node",x:200,y:200,width:32,height:32,visible:true,alpha:1,rotate:0,scaleX:1,scaleY:1,fillColor:"22,119,238",shadow:true,transformAble:true,zIndex:3,dragable:true,selected:false,showSelected:true,font:"12px Consolas",fontColor:"255,255,255",textPosition:"Bottom_Center",textOffsetX:0,textOffsetY:0},{text:"to",elementType:"Node",x:400,y:300,width:32,height:32,visible:true,alpha:1,rotate:0,scaleX:1,scaleY:1,fillColor:"22,119,238",shadow:true,transformAble:true,zIndex:3,dragable:true,selected:false,showSelected:true,font:"12px Consolas",fontColor:"255,255,255",textPosition:"Bottom_Center",textOffsetX:0,textOffsetY:0},{text:"name",elementType:null,x:0,y:0,width:32,height:32,visible:true,alpha:1,rotate:0,scaleX:1,scaleY:1,fillColor:"22,119,238",shadow:true,transformAble:false,zIndex:2,dragable:false,selected:false,showSelected:true,font:"12px Consolas",fontColor:"255,255,255",textPosition:null,textOffsetX:null,textOffsetY:null}]}]}';
+			JTopo.util.loadStageFromJson(str, canvas);
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+									
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+
+  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

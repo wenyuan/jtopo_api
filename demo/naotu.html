@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<meta name="Viewport" content="width=device-width; user-scaleable=no; initial-scale=1.0"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<script src="../js/jquery.js"></script>
+
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+      <style type="text/css">
+		body{
+			background-color: rgb(56,65,68);
+		}
+          #contextmenu {
+              border: 1px solid #aaa;
+              border-bottom: 0;
+              background: #eee;
+              position: absolute;
+              list-style: none;
+              margin: 0;
+              padding: 0;
+              display: none;
+          }
+
+          #contextmenu li a {
+              display: block;
+              padding: 10px;
+              border-bottom: 1px solid #aaa;
+              cursor: pointer;
+          }
+
+          #contextmenu li a:hover {
+              background: #fff;
+          }
+      </style>
+
+      <script id='code'>
+		
+		$(document).ready(function(){
+			window.onresize = function(){
+                $('#canvas')[0].width = document.body.clientWidth;
+				$('#canvas')[0].height = document.body.scrollHeight - 60;
+            };
+            window.onresize();
+		
+		function a(a,b){var c=new JTopo.Link(a,b);return c.paint=function(a){var b,c;null!=this.nodeA&&null!=!this.nodeZ&&(b=(this.nodeA.cx+this.nodeZ.cx)/2,c=(this.nodeA.cy+this.nodeZ.cy)/2,c+=(this.nodeZ.cy-this.nodeA.cy)/2,a.strokeStyle="rgba("+this.strokeColor+","+this.alpha+")",a.lineWidth=this.lineWidth,a.moveTo(this.nodeA.cx,this.nodeA.cy),a.quadraticCurveTo(b,c,this.nodeZ.cx,this.nodeZ.cy),a.stroke())},c.strokeColor="255,255,255",c}function b(a,b,c){var d,g,h,i;if(a==f)return null;for(d=e.childs,g=0;g<d.length;g++)if(h=d[g],h!==a&&!(!h instanceof JTopo.Node)&&(!h.link||h.link.nodeA!==a)&&(i=h.getBound(),i.left-=20,i.right+=20,i.top-=20,i.bottom+=20,b>i.left&&b<i.right&&c>i.top&&c<i.bottom))return h;return null}function c(c,h,i){var j,k,l,m=new JTopo.Node(i);m.borderRadius=8;return m.setCenterLocation(c,h),m.setSize(120,40),m.font="italic 18px 微软雅黑",m.textOffsetY=-2,m.fontColor="0,0,0",m.textPosition="Middle_Center",m.fillColor="164,197,192",e.add(m),j=a(f,m),m.link=j,e.add(j),k=!1,m.mouseup(function(a){k?(l&&(l.fillColor=l.fillColor_bak,this.link.nodeA=l,l=null),k=!1):(g=this,d(a))}),m.mousedrag(function(a){k=!0,l&&(l.fillColor=l.fillColor_bak,l=null);var c=b(m,a.x,a.y);c&&(l=c,l.fillColor_bak=l.fillColor,l.fillColor="254,219,0")}),m}function d(a){2==a.button&&$("#contextmenu").css({top:a.pageY,left:a.pageX}).show()}var e,f,g,h,i=document.getElementById("canvas"),j=new JTopo.Stage(i);showJTopoToobar(j),e=new JTopo.Scene(j),e.background="./img/mind/bg.png",f=new JTopo.Node("主题"),f.font="italic bold 22px 微软雅黑",f.borderRadius=18;f.fontColor="0,0,0",f.textPosition="Middle_Center",f.fillColor="233,223,152",f.setSize(100,60),f.setCenterLocation(i.width/2,i.height/2),e.add(f),h=$("#jtopo_textfield"),e.dbclick(function(a){if(null==a.target)c(a.x,a.y,"分支主题");else{var b=a.target;h.css({top:a.pageY,left:a.pageX-b.width/2}).show().attr("value",b.text).focus().select(),b.text="",h[0].JTopoNode=b}}),$("#jtopo_textfield").blur(function(){h[0].JTopoNode.text=h.hide().val()}),g=null,$("#contextmenu a").click(function(){var a=$(this).text();"删除该节点"==a&&(e.remove(g),g=null),"撤销上一次操作"==a?g.restore():g.save(),"更改颜色"==a?g.fillColor=JTopo.util.randomColor():"顺时针旋转"==a?g.rotate+=.5:"逆时针旋转"==a?g.rotate-=.5:"放大"==a?(g.scaleX+=.2,g.scaleY+=.2):"缩小"==a&&(g.scaleX-=.2,g.scaleY-=.2),$("#contextmenu").hide()}),j.click(function(a){0==a.button&&$("#contextmenu").hide()})});
+	</script>
+  </head>
+
+  <body>
+  <ul id="contextmenu" style="display:none;z-index: 999;">
+      <li><a>顺时针旋转</a></li>
+      <li><a>逆时针旋转</a></li>
+      <li><a>更改颜色</a></li>
+      <li><a>放大</a></li>
+      <li><a>缩小</a></li>
+      <li><a>撤销上一次操作</a></li>
+      <li><a>删除该节点</a></li>
+  </ul>
+  <input id="jtopo_textfield" style="display:none;width: 80px;position: absolute;" onkeydown="if(event.keyCode==13)this.blur();"/>
+	<div id="content" style="width:100%;height:100%">
+		<canvas width="100%" height="100%" id="canvas"></canvas>	
+	</div>
+</body>
+
+</html>

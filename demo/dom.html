@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>JTopo HTML + CSS3 编写 Canvas应用!</title>	
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<script src="../js/jquery.js"></script>		
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	<script type="text/javascript" src="js/jtopo-dom.js"></script>
+	
+	
+	
+	<!-- 标准CSS语法! -->
+	<style type="text/css">		
+		scene {
+			background:url(./img/bg.jpg);			
+		}
+		.host{
+			background:url(./img/host.png);			
+		}
+		#vm1 {
+			width: 60px;
+			height: 60px;
+		}
+		#vm2 {
+			opacity : 0.5;
+			background-color: green;			
+		}
+	</style>
+  </head>
+
+  <body>	
+	<center>
+	
+		<p>HTML + CSS3 编写 Canvas应用!</p>
+		<!-- HTML语法 -->
+		<canvas class="jtopo" width="600" height="400">	
+			<!-- 舞台 -->
+			<stage id="stage">
+				<!-- 场景一 -->
+				<scene id="scene1">
+					<!-- 双击节点切换至场景二 -->
+					<node class="host" x="300" y="30" id="myhost" name="双击下钻" ondbclick="stage.add(scene2)"></node>					
+				</scene>
+				
+				<!-- 场景二 -->
+				<scene id="scene2">											
+					<!-- 树形自动布局 -->
+					<node class="host" x="300" y="100" id="host" name="双击返回" ondbclick="stage.add(scene1)" layout="tree"></node>
+					
+					<!-- CSS3 旋转45度-->
+					<node id="vm1" name="旋转" style="-webkit-transform: rotate(45deg);"></node>
+					
+					<!-- CSS3 纵向拉伸2倍 -->
+					<node id="vm2" name="透明-拉伸" style="-webkit-transform: scale(1,2);"></node>
+					
+					<node id="vm3" name="动画" animate="rotate:2*Math.PI"></node>				
+					
+					<!-- 连线添加事件 -->
+					<line from="host" to="vm1" onmouseover="this.lineWidth=7;" onmouseout="this.lineWidth=3;"></line>
+					<line from="host" to="vm2" onmouseover="this.name='over'" onmouseout="this.name=''"></line>			
+					<line from="host" to="vm3"></line>
+				</scene>				
+			</stage>
+		</canvas>
+				
+		<p>目前：Chrome谷歌浏览器、Opera已测试通过。</p>
+		<p><a href="view-source:http://www.jtopo.com/demo/dom.html" target="_blank">查看源码.</a></p>
+	</center>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

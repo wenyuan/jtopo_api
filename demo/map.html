@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>
+		$(document).ready(function(){
+			baiduMap();
+		});
+		
+		function baiduMap(){
+			var beginX = 771;
+			var beginY = 251;
+			var level = 12;
+			
+			var offsetX = 0;
+			var offsetY = 0;
+		
+			var canvas = document.getElementById('canvas');			
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			stage.showToolbar = false;		
+			
+			// 地图层
+			var mapContentScene = new JTopo.Scene();
+			mapContentScene.shadow = false;
+			mapContentScene.areaSelect = false;
+			mapContentScene.mode = 'drag';
+					
+			// 标注层
+			var tipScene = new JTopo.Scene();
+			tipScene.shadow = false;
+			tipScene.areaSelect = false;
+			tipScene.mode = 'drag';
+			
+			// 菜单层(缩放控制节点(菜单层））
+			var menuScene = new JTopo.Scene();
+			menuScene.areaSelect = false;
+			menuScene.translate = false;
+			
+			var sliderNode = new JTopo.Node();
+			sliderNode.showSelected = false;			
+			sliderNode.setLocation(20,20);
+			sliderNode.setImage('./img/mapslider.png', true);
+			sliderNode.dragable = false;
+			menuScene.add(sliderNode);
+			
+			function tileNode(x, y){				
+				var node = new JTopo.Node();			
+				node.tileX = x;
+				node.tileY = y;
+				var tileX = beginX + x;
+				var tileY = beginY - y;
+				var url = 'http://online3.map.bdimg.com/tile/?qt=tile&x='+tileX+'&y='+tileY+'&z='+level+'&styles=pl';
+				node.showSelected = false;
+				
+				node.setImage(url, true);
+				node.setLocation(x * 256, y * 256);	
+				return node;
+			}
+			
+			// 加载瓦片图
+			function loadTiles(){
+				mapContentScene.clear();
+				for(var i=0; i<3; i++){
+					for(var j=0; j<4; j++){
+						var node = tileNode(offsetX + j, offsetY+i);
+						mapContentScene.add(node);
+					}
+				}
+			}
+
+			var prevTipNode = null;
+			// 定义地图标注
+			function mapTipNode(x, y, name){
+				var tipNode = new JTopo.Node();	
+				tipNode.setImage('./img/fruit/xxxf.png', true);
+				tipNode.fontColor = '0,0,255';
+				tipNode.textPosition = 'Top_Center';				
+				tipNode.showSelected = false;
+				tipNode.setCenterLocation(x, y);
+				tipNode.shadow = false;
+				
+				tipNode.addEventListener("mouseover", function(e){
+					e.target.name = name;//"这是提示节点：" + n;
+				});
+				tipNode.addEventListener("mouseout", function(e){
+					e.target.name = "";
+				});
+				if(prevTipNode != null){
+					tipScene.add(new JTopo.Link(prevTipNode, tipNode));
+				}
+				prevTipNode = tipNode;
+				return tipNode;
+			}
+
+			// 右击鼠标添加标注
+			mapContentScene.addEventListener("mouseup", function(e){
+				if(e.button != 2) return;
+				var tip = mapTipNode(e.x, e.y, window.prompt("标注信息:", "请输入标注..."));
+				tipScene.add(tip);				
+			});
+			
+			// 拖拽加载数据
+			mapContentScene.mousedrag(function(e){
+				var bound = mapContentScene.getElementsBound();
+				//console.log(offsetX + ':' + offsetY + mapContentScene.translateX);
+				if(bound.left + mapContentScene.translateX > 0){				
+					offsetX--;
+				}
+				if(bound.right + mapContentScene.translateX <= canvas.width){		
+					offsetX++;
+				}
+				if(bound.top + mapContentScene.translateY > 0){				
+					offsetY--;
+				}
+				if(bound.bottom + mapContentScene.translateY <= canvas.height){				
+					offsetY++;
+				}
+				//console.log(offsetX + ':' + offsetY);
+				loadTiles();				
+			});
+			
+			// 鼠标滚轮，缩放
+			mapContentScene.addEventListener("mousewheel", function(e){
+				if(e.wheelDelta > 0){
+					zoomIn();
+				}else{
+					zoomOut();
+				}
+			});
+			function zoomIn(){
+				level--;
+				if(level < 12 ) level = 12;
+				if(level == 13){
+					beginX = 1543;
+					beginY = 502;
+				}else if(level == 12){
+					beginX = 771;
+					beginY = 251;
+				}
+				loadTiles();
+			}
+			function zoomOut(){
+				level++;
+				if(level > 14) level = 14;
+				if(level == 13){
+					beginX = 1543;
+					beginY = 502;
+				}else if(level == 14){
+					beginX = 3088;
+					beginY = 1004;
+				}
+				loadTiles();
+			}
+			
+			stage.add(mapContentScene);
+			stage.add(tipScene);
+			stage.add(menuScene);
+			
+			(function init(){
+				loadTiles();
+			})();
+		}
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				鼠标：滚轮-缩放，右键-添加标注
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+									
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

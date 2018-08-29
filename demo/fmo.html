@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width" />
+	<title></title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+	
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<script src="../js/jquery.js"></script>
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	
+	<script id='code'>
+			
+		$(document).ready(function(){
+			var canvas = document.getElementById('canvas');
+			
+			$(window).resize(resizeCanvas);
+			function resizeCanvas() {			 
+				canvas.width = $(window).get(0).innerWidth;
+				canvas.height = $(window).get(0).innerHeight;			 			 
+			};
+			resizeCanvas();
+			
+			var stage = new JTopo.Stage(canvas);
+			var scene = new JTopo.Scene(stage);
+			scene.background = './img/fmobg.jpg';
+			
+			var table = 'Ag,zg,tg,kv,Ib,Cg,lg,mg,wf,vf'.split(',');
+			
+			for(var i=0; i<40; i++){
+				var idx = Math.floor(Math.random() * (table.length+1));
+				var node = new JTopo.Node(table[idx] + idx);
+				node.textOffsetX = -10;
+				node.textOffsetY = -10;
+				node.shadow = false;
+				node.dragable = false;
+				node.setSize(60, 70);
+				//node.showSelected = false;
+				node.textPosition = "Middle_Center";
+				node.alpha = Math.random();
+				if(node.alpha < 0.3){
+					node.alpha = 0.3;
+				}
+				if(node.alpha>0.7){
+					node.alpha = 0.7;
+				}
+				node.fillColor = '73,160,154';
+				scene.add(node);
+				if(Math.random() < 0.3){
+					node.fillColor = '200,0,0';
+					var r = Math.random();
+					if(r<0.3){
+						r = 0.3;
+					}
+					if(Math.random() < 0.5){
+						node.fillColor = '255,255,0';
+					}
+					node.alpha =  r / 2;
+					JTopo.Animate.stepByStep(node, {alpha: r}, 3000, true).start();
+				}
+			}
+			var layout = new JTopo.layout.GridLayout(5, 8);
+			scene.doLayout(layout);
+			
+			var animate = false;
+			var lastNode = null;
+			scene.dbclick(function(event){
+				if(animate == true) return;
+				var node = event.target;
+				
+				if(node != null){
+					if(node !== lastNode){
+						var location = node.getCenterLocation();
+						if(event.x > stage.canvas.width/2){
+							location.x = location.x - stage.canvas.width/2;
+							location.x = -location.x;
+						}else{
+							location.x = stage.canvas.width/2 - location.x;
+						}
+						
+						if(event.y > stage.canvas.height/2){
+							location.y = location.y - stage.height/2;
+							location.y = -location.y;
+						}else{
+							location.y = stage.canvas.height/2 - location.y ;
+						}
+						animate = true;
+						JTopo.Animate.stepByStep(scene, 
+							{translateX: location.x, translateY: location.y, scaleX: 4, scaleY: 4}, 600).start().onStop(function(){
+							animate = false;
+						});
+						lastNode = node;
+					}else{
+						var sc = node.scaleX;
+						animate = true;
+						JTopo.Animate.stepByStep(node, {scaleX: 0}, 500).start().onStop(function(){
+							if(node.text != 'Back'){								
+								node._text = node.text;
+								node.text = 'Back';
+							}else{
+								node.text = node._text;
+							}
+							JTopo.Animate.stepByStep(node, {scaleX: sc}, 500).start().onStop(function(){
+								animate = false;
+							});
+						});
+					}
+				}else{			
+					if(node != null && lastNode == null){
+						lastNode = node;	
+					}
+					if(node == null && scene.translateX != 0){
+						lastNode = null;
+						animate = true;
+						JTopo.Animate.stepByStep(scene, {translateX: 0, translateY: 0, scaleX: 1, scaleY: 1}, 600).start().onStop(function(){
+							animate = false;
+						});
+					}
+				}
+			});
+
+
+			setTimeout(function(){
+				runPrefixMethod(document, "CancelFullScreen");
+			}, 100000);
+		});
+	</script>
+  </head>
+
+  <body>	
+	<canvas id="canvas"></canvas>				
+</body>
+
+</html>

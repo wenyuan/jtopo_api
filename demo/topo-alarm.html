@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo 自动布局</title>
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>			
+		$(document).ready(function(){					
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			var scene = new JTopo.Scene(stage);	
+			scene.alpha = 1;
+			
+			function addNode(text, icon, x , y){
+				var node = new JTopo.Node();
+				node.setImage('./img/topo/'+ icon +'.png', true);
+				node.fontColor = '0,0,0';
+				node.setLocation(x, y);
+				scene.add(node);
+				
+				node.mouseover(function(){
+					this.text = text;
+				});
+				node.mouseout(function(){
+					this.text = null;
+				});
+				return node;
+			}
+			
+
+			function addLink(nodeA, nodeZ){
+				var link = new JTopo.Link(nodeA, nodeZ);
+				link.strokeColor = '204,204,204';
+				link.lineWidth = 1;
+				scene.add(link);
+				return link;
+			}
+			
+			var rootNode = addNode('root', 'blue', 338, 225);
+			rootNode.alarm = 'Warrning';
+			rootNode.alarmColor = '255,0,0';
+			rootNode.alarmAlpha = 0.9;
+			
+			var icons = ['green', 'blue', 'red1', 'red2'];
+			for(var i=0; i<icons.length; i++){
+				var node = addNode('input_' + i, icons[i], 231, 150 + i * 50);	
+				var link = new JTopo.FlexionalLink(rootNode, node);
+				link.direction = 'horizontal';
+				link.strokeColor = '204,204,204';
+				link.lineWidth = 1;
+				scene.add(link);			
+			}
+			
+			var fwNode = addNode('fw_1', 'rect', 338 + 50, 184);
+			addLink(rootNode, fwNode);
+			
+			var cloudNode = addNode('cloud', 'cloud', 340 + 100, 218);
+			addLink(fwNode, cloudNode);
+			
+			var fw2Node = addNode('fw2Node', 'rect', 339 + 200, 184);
+			addLink(cloudNode, fw2Node);
+			
+			var hostNode = addNode('host', 'gray', 339 + 250, 225);
+			addLink(fw2Node, hostNode);
+			
+			for(var i=0; i<icons.length-1; i++){
+				var node = addNode('vm_' + i, icons[i], 339 + 300, 175 + i * 50);	
+				var link = new JTopo.FoldLink(hostNode, node);
+				link.direction = 'vertical';
+				link.strokeColor = '204,204,204';
+				link.lineWidth = 1;
+				scene.add(link);			
+			}
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+</html>

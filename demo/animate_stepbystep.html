@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>			
+		$(document).ready(function(){
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+			
+			var scene = new JTopo.Scene(stage);	
+			stage.frames = 24;
+			scene.background = './img/bg.jpg';
+			var animates = [
+				{rotate: 2*Math.PI}, 
+				{scaleX: 2},
+				{height:130, y: 180},
+				{alpha: 0.1},
+				{alpha: 0.2, y: 90},
+				{rotate: -4*Math.PI, scaleX: 2.5, scaleY: 2.5},
+				{x: 300, y: 400, width: 10, height: 10, rotate: 2*Math.PI}
+			];
+			
+			for(var i=0; i<animates.length; i++){
+				var node = new JTopo.Node("node");
+				node.setCenterLocation(100 + i * 90, 300);
+				var color = JTopo.util.randomColor();
+                node.fillColor = color; // 颜色				
+				scene.add(node);
+				
+				JTopo.Animate.stepByStep(node, animates[i], 3000, true).start();	
+			}
+			
+			function myNode(text, x, y){
+				var node = new JTopo.Node(text);
+				node.percent = 0.8;
+				node.beginDegree = 0;
+				node.width = node.height = 70;
+				node.setLocation(x, y);
+				node.textPosition = "Middle_Center";
+				node.paint = function(g){
+					g.save();
+					g.beginPath();
+					g.moveTo(0,0);
+					g.fillStyle = 'rgba(0,255,0,' + this.alpha + ')';
+					g.arc(0, 0, this.width/2, this.beginDegree, this.beginDegree + 2*Math.PI*this.percent);
+					g.fill();				
+					g.closePath();
+
+					g.beginPath();
+					g.fillStyle = 'rgba(0,0,255,' + this.alpha + ')';
+					g.moveTo(0,0);
+					g.arc(0, 0, this.width/2-8, this.beginDegree, this.beginDegree + 2*Math.PI);				
+					g.fill();
+					g.closePath();								
+					g.restore();							
+					this.paintText(g);
+				};
+				scene.add(node);
+				return node;
+			}
+			var node1 = myNode('自定义',355, 151);
+			node1.percent = 0.1;
+			JTopo.Animate.stepByStep(node1, {
+				percent: 1
+			}, 5000, true).start();	
+			
+			var node2 = myNode('自定义',155, 151);
+			JTopo.Animate.stepByStep(node2, {				
+				beginDegree: 2*Math.PI
+			}, 3000, true).start();	
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

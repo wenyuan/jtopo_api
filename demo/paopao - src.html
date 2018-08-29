@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar2.js"></script>
+	<style type="text/css">
+	#contextmenu {
+		border: 1px solid #aaa;
+		border-bottom: 0;
+		background: #eee;
+		position: absolute;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: none;
+	}
+																			   
+	#contextmenu li a {
+		display: block;
+		padding: 10px;
+		border-bottom: 1px solid #aaa;
+		cursor: pointer;
+	}
+																			   
+	#contextmenu li a:hover {
+		background: #fff;
+	}
+	#menu img{
+		border: solid 2px white;
+	}
+	#menu img:hover{
+		border: solid 2px blue;
+	}
+	</style>	
+	<script id='code'>
+		var MAPS = ['3,3,3,3,3,3,3,3,3,3,6,3,4,1,1,1,2,1,1,1,1,1,6,3,1,5,3,3,3,1,1,2,1,1,1,1,1,5,1,4,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,4,9,1,1,1,1,1,2,1,1,1,1,4,1,1,1,10,4,1,1,1,1,2,1,1,1,4,4,1,1,1,9,1,1,1,1,1,2,1,1,1,1,1,1,1,1,10,4,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1'];
+	
+		$(document).ready(function() {
+			var canvas = document.getElementById("canvas");
+			var stage = new JTopo.Stage(canvas);
+			showJTopoToobar(stage);
+			
+			var mapLayer = new JTopo.Scene(stage);
+			mapLayer.mode = 'select';
+			mapLayer.areaSelect = false;
+						
+			var effectLayer = new JTopo.Scene(stage);
+			effectLayer.mode = 'select';
+			effectLayer.areaSelect = false;
+			
+			var spriteLayer = new JTopo.Scene(stage);
+			spriteLayer.mode = 'select';
+			spriteLayer.areaSelect = false;
+
+						
+			var rows = 10;
+			var cols = 15;
+			var tileWidth = 40;
+			var tileHeight = 40;
+			
+			var boxTileId = 4;
+			
+			var sprite = new JTopo.Node();
+			sprite.setImage('./img/game/sprite.png', true);
+			sprite.shadow = false;
+			sprite.showSelected = false;
+			sprite.dragable = false;			
+			sprite.tileRow = 2;
+			sprite.tileCol = 3;
+			sprite.setLocation(sprite.tileCol * tileWidth, sprite.tileRow * tileHeight - 20);								
+			spriteLayer.add(sprite);
+			
+			window.addEventListener('keydown', function(e){
+				var key = e.which;
+				var LEFT = 37;
+				var RIGHT = 39;
+				var UP = 38;
+				var DOWN = 40;
+				var SHIFT = 16;
+				
+				if(key == LEFT && sprite.tileCol > 0){
+					var nextTileId = tiles[sprite.tileRow][sprite.tileCol-1].tileId;
+					if(nextTileId != '1') return;
+					sprite.x -= 40;
+					sprite.tileCol--;
+				}else if(key == RIGHT && sprite.tileCol+1 < cols){
+					var nextTileId = tiles[sprite.tileRow][sprite.tileCol+1].tileId;
+					if(nextTileId != '1') return;
+					sprite.x += 40;
+					sprite.tileCol++;
+				}else if(key == UP && sprite.tileRow > 0){
+					var nextTileId = tiles[sprite.tileRow-1][sprite.tileCol].tileId;
+					if(nextTileId != '1') return;
+					sprite.y -= 40;
+					sprite.tileRow--;
+				}else if(key == DOWN && sprite.tileRow+1 < rows){
+					var nextTileId = tiles[sprite.tileRow+1][sprite.tileCol].tileId;
+					if(nextTileId != '1') return;
+					sprite.y += 40;
+					sprite.tileRow++;
+				}else if(key == SHIFT){
+					var ball = new JTopo.Node();
+					ball.tileRow = sprite.tileRow;
+					ball.tileCol = sprite.tileCol;
+					ball.setImage('./img/game/ball.png',true);
+					ball.setLocation(ball.tileCol * tileWidth, ball.tileRow * tileHeight);	
+					ball.shadow = false;
+					ball.showSelected = false;
+					ball.dragable = false;
+					function bom(node){
+						if(node.tileId != boxTileId) return;// 只有箱子才可以炸开
+						node.tileId = 1;
+						node.setImage('./img/game/'+node.tileId+'.png',true);
+					}
+					
+					JTopo.Animate.stepByStep(ball, {scaleX: 1.2, scaleY: 1.2}, 1500).start().onStop(function(){
+						JTopo.Animate.stepByStep(ball, {scaleX: 3, scaleY: 0.8}, 80).start().onStop(function(){
+							JTopo.Animate.stepByStep(ball, {scaleY: 3, scaleX: 0.8}, 60).start().onStop(function(){
+								if(ball.tileRow > 0){
+									var up = tiles[ball.tileRow-1][ball.tileCol];
+									bom(up);
+								}
+								if(ball.tileCol > 0){
+									var left = tiles[ball.tileRow][ball.tileCol-1];
+									bom(left);
+								}
+								if(ball.tileRow+1 < rows){
+									var down = tiles[ball.tileRow+1][ball.tileCol];
+									bom(down);
+								}
+								if(ball.tileCol+1 < cols){
+									var right = tiles[ball.tileRow][ball.tileCol+1];
+									bom(right);
+								}
+								effectLayer.remove(ball);
+							});
+						});
+					});
+					
+					effectLayer.add(ball);
+				}
+			});
+			var tiles = [];
+			function initMapScene(){
+				tiles = [];
+				for(var i=0; i<rows; i++){
+					var rowNodes = [];
+					for(var j=0; j<cols; j++){
+						var node = new JTopo.Node();
+						node.tileRow = i;
+						node.tileCol = j;
+						node.setSize(tileWidth, tileHeight);
+						node.setLocation(node.tileCol * tileWidth, node.tileRow * tileHeight);
+						mapLayer.add(node);
+						node.shadow = false;
+						node.showSelected = false;
+						node.dragable = false;
+						node.tileId = 1;
+						node.setImage('./img/game/' + node.tileId + '.png');
+						rowNodes.push(node);
+					}
+					tiles.push(rowNodes);
+				}
+			}
+			initMapScene();
+			
+			mapLayer.click(function(e){
+				var node = e.target;
+				console.log(currTile);
+				if(node && currTile){
+					var tileId = currTile.attr('tileId');
+					node.tileId = tileId;
+					node.setImage('./img/game/' + node.tileId  + '.png');
+				}
+			});
+			
+			function loadMap(tiles, datas){
+				var nodes = JTopo.stage.find('node');
+				var rowNodes = [];
+				var n = 0;
+				for(var i=0; i<rows; i++){
+					for(var j=0; j<cols; j++){
+						var node = tiles[i][j];
+						node.tileId = datas[n++];
+						node.setImage('./img/game/' + node.tileId + '.png');
+					}
+				}
+			}
+			var datas = MAPS[0];
+			loadMap(tiles, datas.split(','));
+			
+			var currTile;
+			// 左侧图标列表
+			for(var i = 1; i<= 10; i++){
+				var icon = $('<img style="margin-left:6px;" src="./img/game/' + i + '.png" draggable="true" ondragstart="drag(event)">');
+				$("#menu").append(icon);
+				
+				icon.attr('tileId', i);
+				icon.click(function(){
+					currTile = $(this);
+				});
+			}
+		});
+	</script>
+  </head>
+
+  <body>
+	<textarea id="jtopo_textfield" style="display:none;width: 60px;position: absolute;" onkeydown="if(event.keyCode==13)this.blur();"></textarea>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			说明：1.点击图标，然后再点击画布 2.方向键控制移动 3.shift键释放泡泡。
+			<ul id="menu">
+			</ul>
+						
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="600" height="400" id="canvas" ondrop="drop(event)" ondragover="allowDrop(event)"></canvas>
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+</body>
+
+</html>

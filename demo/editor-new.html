@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar2.js"></script>
+	<style type="text/css">
+	#contextmenu {
+		border: 1px solid #aaa;
+		border-bottom: 0;
+		background: #eee;
+		position: absolute;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: none;
+	}
+																			   
+	#contextmenu li a {
+		display: block;
+		padding: 10px;
+		border-bottom: 1px solid #aaa;
+		cursor: pointer;
+	}
+																			   
+	#contextmenu li a:hover {
+		background: #fff;
+	}
+	#menu img{
+		border: solid 2px white;
+	}
+	#menu img:hover{
+		border: solid 2px blue;
+	}
+	#tip_div{
+		position: absolute;
+		width: 200px;
+		height: 100px;
+		z-index: 1004;
+		display:none;
+		background-color: rgb(208,146,133);
+		filter:Alpha(Opacity=90,Style= 0);
+		opacity: 0.9;
+	}
+	</style>	
+	<script id='code'>		
+
+		function allowDrop(e) {
+			e.preventDefault();
+		}
+
+		function drag(e) {
+			e.dataTransfer.setData("imgSrc", e.target.src);
+		}
+		function drop(e) {
+			e.preventDefault();
+			imgSrc = e.dataTransfer.getData("imgSrc");
+		}
+		
+		var scene, currentNode, imgSrc;
+
+		$(document).ready(function() {
+			
+			var canvas = document.getElementById("canvas");
+			var stage = new JTopo.Stage(canvas);
+			showJTopoToobar(stage);
+			
+			var scene = new JTopo.Scene(stage);
+			scene.background = "./img/bg.jpg";
+			
+			var startNode = new JTopo.CircleNode();
+			startNode.radius = 1;
+			var endNode = new JTopo.CircleNode();
+			endNode.radius = 1;
+			
+			var link = new JTopo.Link(startNode, endNode);
+			link.visible = false;
+			
+			// 拖拽图标到场景并松开鼠标
+			stage.mouseover(function(e) {
+				if (null != imgSrc) {
+					addNodeToStage(imgSrc, e.x, e.y);
+					imgSrc = null;
+				}
+			});
+			
+			// 向场景指定位置增加图标
+			function addNodeToStage(img, x, y){
+				var b = new JTopo.Node();
+				b.setImage(img, true);
+				b.setLocation(x, y);
+				scene.add(b);
+				
+				b.mouseover(function(e){
+					//popTip(e, this);
+				});
+				b.mouseout(function(e){
+					//hideTip(e, this);
+				});
+				b.addEventListener('portclick', function(e){
+					
+				});
+				b.shadow = false;
+			}
+			
+			function showLink(){
+				link.visible = true;
+				scene.add(link);
+			}
+			function hideLink(){
+				link.visible = false;
+				scene.remove(link);
+			}
+			
+			// 增加连线连接两个端点
+			function linkHandler(node, port){
+				if(port){
+					if (link.visible == false){ // 开始绘制线
+						link.startNode = node;
+						link.startPort = port;
+						var cp = node.getCenterLocation();
+			
+						link.nodeA.x = cp.x + port.x, 
+						link.nodeA.y = cp.y + port.y, 
+						link.nodeZ.x = cp.x + port.x, 
+						link.nodeZ.y = cp.y + port.y; 
+						showLink();
+					}else if (link.startNode !== node) { // 结束绘制
+						hideLink();
+						link.startPort.clicked = false;
+						port.clicked = false;
+						var l = new JTopo.PCLink(link.startNode, node, link.startPort.name, port.name);
+						l.shadow = false;
+						l.arrowsRadius = 10;
+						l.arrowsOffset = 0;
+						scene.add(l);
+					}
+
+				}else{
+					if (link.visible == false){ // 开始绘制线
+						link.startNode = node;
+						link.nodeA.x = node.getCenterLocation().x, 
+						link.nodeA.y = node.getCenterLocation().y, 
+						link.nodeZ.x = node.getCenterLocation().x, 
+						link.nodeZ.y = node.getCenterLocation().y; 
+						showLink();
+					}else if (link.startNode !== node) { // 结束绘制
+						hideLink();
+						var l = new JTopo.Link(link.startNode, node);
+						l.shadow = false;
+						l.arrowsRadius = 10;
+						l.arrowsOffset = 0;
+						scene.add(l);
+					}
+				}
+			}
+			
+			// 松开鼠标左键
+			scene.mouseup(function(e) {
+				if (2 == e.button) return;
+				var node = e.target;
+				currentNode = node;
+				
+				// 端口连线
+				if(node && node.getSelectedPort && node.getSelectedPort()){
+					var port = node.getSelectedPort();
+					if(port){
+						console.log(port.name + '被选中');
+						linkHandler(node, port);
+					}else{
+						// 隐藏掉连线
+						hideLink();
+					}
+				}else{
+					if(node && node instanceof JTopo.Node && !node.startNode){
+						linkHandler(node);
+					}else{
+						// 隐藏掉连线
+						hideLink();
+					}
+				}
+			});
+			
+			var downX, downY;
+			scene.mousedown(function(e) {
+				downX = e.x;
+				downY = e.y;
+			});
+			
+			scene.mousemove(function(e) {
+				link.nodeZ.setLocation(e.x, e.y);
+			});
+			
+			var textfield = $("#jtopo_textfield");
+			scene.dbclick(function(e) {
+				var node = e.target;
+				if (null != node) {
+					hideLink();
+
+					if(null == node.text){
+						node.text = "";
+					}
+					textfield.css({
+						top: e.pageY,
+						left: e.pageX - node.width / 2
+					}).show().attr("value", node.text).focus().select();
+					node.text = "";
+					textfield[0].JTopoNode = node;
+				}
+			});
+			$("#jtopo_textfield").blur(function() {
+				textfield[0].JTopoNode.text = textfield.hide().val();
+			});
+			
+			
+			stage.click(function(e) {
+				0 == e.button && $("#contextmenu").hide();
+			});
+			
+			scene.mouseup(function(e) {
+				currentNode = e.target;
+				if(2 == e.button){
+					popMenu(e);
+					hideLink();
+				}
+			});
+			
+			// 弹出tip菜单
+			function popTip(e, node) {
+				$("#tip_div").css({
+					top:e.pageY,
+					left:e.pageX
+				}).show();
+			}
+			function hideTip(e, node) {
+				$("#tip_div").hide();
+			}
+			
+			// 弹出右键菜单
+			function popMenu(e) {
+				$("#contextmenu").css({
+					top:e.pageY,
+					left:e.pageX
+				}).show();
+			}
+			// 右键菜单处理
+			var cutNode,copyNode,sourceNode;
+			$("#contextmenu a").click(function() {
+				var m = $(this).text();
+				if("删 除" == m){
+					scene.remove(currentNode);
+				}else if("剪 切" == m){
+					cutNode = currentNode;
+					scene.remove(currentNode);
+					sourceNode = cutNode;
+				}else if("复 制" == m){
+					copyNode = currentNode;
+					sourceNode = copyNode;
+				}else if("粘 贴" == m && sourceNode){
+					var newNode = new JTopo.Node();
+					if(sourceNode.image){
+						newNode.setImage(sourceNode.image, true);
+					}
+					newNode.text = sourceNode.text;
+					newNode.setLocation(downX, downY);
+					scene.add(newNode);
+					newNode.mouseover(function(e){
+						popTip(e, this);
+					});
+					newNode.mouseout(function(e){
+						hideTip(e, this);
+					});
+				}
+				$("#contextmenu").hide();
+			});
+			
+			// 左侧图标列表
+			for(var i = 1; i<= 21; i++){
+				var icon = $('<img style="margin-left:6px;" src="./img/editor/' + i + '.png" draggable="true" ondragstart="drag(event)">');
+				$("#menu").append(icon);
+			}
+		});
+	</script>
+  </head>
+
+  <body>
+   <ul id="contextmenu" style="display:none;">	
+	<li><a>剪 切</a></li>
+	<li><a>复 制</a></li>	
+	<li><a>粘 贴</a></li>
+	<li><a>删 除</a></li>
+  </ul>
+  <div id="tip_div" style="display:none;">	
+	<center>
+		<p>windowsxp</p>
+		<p>保存：<span style="color:blue;">是</span></p>
+		<p>IP: <span style="color:blue;">192.168.1.2</span></p>
+		<p><a href="#"><span style="color:blue;">启动</span></a></p>
+	</center>
+  </div>
+  
+	<textarea id="jtopo_textfield" style="display:none;width: 60px;position: absolute;" onkeydown="if(event.keyCode==13)this.blur();"></textarea>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			说明：1.拖拽到右边画布上 2.画布上节点有右键菜单 3.双击编辑节点文本。
+			<ul id="menu">
+			</ul>
+						
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas" ondrop="drop(event)" ondragover="allowDrop(event)"></canvas>
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+</body>
+
+</html>

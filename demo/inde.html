@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<meta name="Viewport" content="width=device-width; user-scaleable=no; initial-scale=1.0"/>
+	<title>index.html</title>
+	<script src="../js/jquery.js"></script>
+
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+
+      <script id='code'>
+		function show(){
+			var canvas = document.getElementById('canvas');	
+            canvas.width = document.body.clientWidth;
+			canvas.height = document.body.scrollHeight - 60;
+            var cx = canvas.width/2;
+            var cy = canvas.height/2;
+
+			var stage = new JTopo.Stage(canvas);
+			var scene = new JTopo.Scene(stage);
+
+			var node = new JTopo.Node();
+            node.textPosition = 'Middle_Center';
+			node.setCenterLocation(cx, cy);
+			scene.add(node);
+
+            var FL = 250;
+            var x=cx;
+            var y=cy;
+            var z=0;
+            var v = {x:0, y:0, z:0};
+
+            stage.mousemove(function(e){
+                z = (e.y - cy);
+                x = (cx - e.x);
+                y = (cy - e.y);
+
+                if(z > -FL){
+                    node.visible = true;
+                    var scale = FL / (FL + z);
+                    if(scale == Infinity){
+                        scale = 1;
+                    }
+                    node.cx = cx + x * scale;
+                    node.cy = cy + y * scale;
+                    node.scaleX = scale;
+                    node.scaleY = scale;
+                    node.alpha = scale * 0.7 + 0.3;
+                }else{
+                    console.log('不可见');
+                    node.visible = false;
+                }
+            });
+
+            window.addEventListener('keydown', function(e) {
+                var key = e.which;
+                var LEFT = 37;
+                var RIGHT = 39;
+                var UP = 38;
+                var DOWN = 40;
+                var SHIFT = 16;
+                var CTRL = 17;
+            });
+		}
+		
+		$(document).ready(show);
+	</script>
+  </head>
+
+<body>
+		<canvas width="100%" height="100%" id="canvas"></canvas>	
+</body>
+
+</html>

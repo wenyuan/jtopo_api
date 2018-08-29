@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>
+		$(document).ready(function(){
+			baiduMap();
+		});
+		
+		function baiduMap(){
+			var beginX = 49349;
+			var beginY = 16042;
+			
+			var level = 18;
+			
+			var offsetX = 0;
+			var offsetY = 0;
+		
+			var canvas = document.getElementById('canvas');	
+			canvas.width = 1024;
+			canvas.height = 600;
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+					
+			// 地图层
+			var mapContentScene = new JTopo.Scene();
+			mapContentScene.shadow = false;
+			mapContentScene.areaSelect = false;
+			mapContentScene.mode = 'drag';
+					
+			// 标注层
+			var tipScene = new JTopo.Scene();
+			tipScene.shadow = false;
+			tipScene.areaSelect = false;
+			//tipScene.mode = 'drag';
+			
+			// 菜单层(缩放控制节点(菜单层））
+			var menuScene = new JTopo.Scene();
+			menuScene.areaSelect = false;
+			
+			function tileNode(x, y){				
+				var node = new JTopo.Node();			
+				node.tileX = x;
+				node.tileY = y;
+				var tileX = beginX + x;
+				var tileY = beginY - y;
+				var url = 'http://shangetu0.map.bdimg.com/it/u=x='+tileX+';y='+tileY+';z='+level+';v=009;type=sate&fm=46&udt=20140117';
+				//var url = 'http://online3.map.bdimg.com/tile/?qt=tile&x='+tileX+'&y='+tileY+'&z='+level+'&styles=pl';
+				node.showSelected = false;
+				node.setImage(url, true);
+				node.setLocation(x * 256, y * 256);	
+				return node;
+			}
+			
+			// 加载瓦片图
+			function loadTiles(){
+				mapContentScene.clear();
+				console.log(mapContentscene.childs.length);
+				for(var i=0; i<4; i++){
+					for(var j=0; j<6; j++){
+						var node = tileNode(offsetX + j, offsetY+i);
+						mapContentScene.add(node);
+					}
+				}
+			}
+
+			var prevTipNode = null;
+			
+			
+			// 精灵
+			
+			var sprite = new JTopo.AnimateNode('./img/effect/xingzou.png', 1, 4, 1000, 1);                    
+			sprite.setSize(64, 90);
+			sprite.setCenterLocation(stage.width/2, stage.height/2);                                
+			sprite.repeatPlay = true;            
+			sprite.play();
+			
+			tipScene.add(sprite);
+		
+
+			// 右击鼠标添加标注
+			mapContentScene.addEventListener("mouseup", function(e){
+				if(e.button != 2) return;
+				var tip = mapTipNode(e.x, e.y, window.prompt("标注信息:", "请输入标注..."));
+				tipScene.add(tip);				
+			});
+			
+			// 拖拽加载数据
+			mapContentScene.addEventListener("mousedrag", function(e){	
+				updateTiles();
+				loadTiles();				
+			});
+			
+			function updateTiles(){
+				var bound = mapContentScene.getElementBound();
+				if(bound.left + mapContentScene.translateX > 0){				
+					offsetX--;
+				}
+				if(bound.right + 256 + mapContentScene.translateX < mapContentScene.width){		
+					offsetX++;
+				}
+				if(bound.top + mapContentScene.translateY > 0){				
+					offsetY--;
+				}
+				if(bound.bottom + 256 + mapContentScene.translateY < mapContentScene.height){				
+					offsetY++;
+				}
+			}
+			
+			
+			function move(dx, dy){
+				mapContentScene.translateX += dx;
+				mapContentScene.translateY += dy;
+				updateTiles();
+				loadTiles();
+			}
+			
+			stage.add(mapContentScene);
+			stage.add(tipScene);
+			stage.add(menuScene);
+			
+			(function init(){
+				loadTiles();
+				
+			})();
+			
+			
+			
+			mapContentScene.addEventListener('keydown', function(event){
+				var dx = 0;
+				var dy = 0;
+				var keyCode = event.keyCode;
+				//console.log(keyCode);
+				if(keyCode == 38){
+					dy--;
+					sprite.rowOffset = 2;
+				}else if(keyCode == 40){
+					dy++;
+					sprite.rowOffset = 3;
+				}else if(keyCode == 37){
+					sprite.rowOffset = 1;
+					dx++;
+				}else if(keyCode == 39){
+					sprite.rowOffset = 0;
+					dx--;
+				}
+				if(dx != 0 || dy != 0){
+					move(dx*5, dy*5);
+				}  	
+			});
+			
+		}
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left" style="width:0px;">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right" style="float:left;">
+				鼠标：滚轮-缩放，右键-添加标注
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+									
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

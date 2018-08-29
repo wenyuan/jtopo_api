@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>	
+		var layout = null;
+		var hostLink = 'Link';
+		var cloudLink = 'Link';
+		var scene = null;
+		
+		function drawNode(){
+			scene.clear();
+			var cloudNode = new JTopo.Node();
+			cloudNode.setImage('./img/cloud.png');
+			cloudNode.setSize(64, 64);
+			cloudNode.setLocation(360,230);			
+			cloudNode.layout = {type: 'star', radius:160};			
+			scene.add(cloudNode);
+			
+			for(var i=1; i<4; i++){
+				var node = new JTopo.Node();
+				node.setImage('./img/host.png');
+				node.setSize(30, 26);
+				node.setLocation(scene.width * Math.random(), scene.height * Math.random());
+				node.layout = {type: 'star', radius:100}; //
+	
+				scene.add(node);								
+				var link = new JTopo[cloudLink](cloudNode, node);
+				scene.add(link);
+				
+				for(var j=0; j<7; j++){
+					var vmNode = new JTopo.Node('vm-' + i + '-' + j);
+					vmNode.setImage('./img/vm.png');
+					vmNode.setSize(30, 26);
+					vmNode.setLocation(scene.width * Math.random(), scene.height * Math.random());
+					scene.add(vmNode);					
+					scene.add(new JTopo[hostLink](node, vmNode));					
+				}
+			}
+						
+			if(layout == 'round'){
+				cloudNode.layout = {type: 'star', radius:150};
+				var hostNodes = JTopo.layout.getNodeChilds(scene, cloudNode);
+				for(var i=0; i<hostNodes.length; i++){
+					hostNodes[i].layout = {type: 'star', radius:80};
+				}
+			}else{
+				cloudNode.layout = {type: 'tree', width: 300, height: 120, direction:'bottom'};						
+				var hostNodes = JTopo.layout.getNodeChilds(scene, cloudNode);
+				for(var i=0; i<hostNodes.length; i++){
+					hostNodes[i].layout = {type: 'tree', width:40, height:69};
+				}
+			}	
+			JTopo.layout.layoutNode(scene, cloudNode);
+		}
+	
+		function show(){					
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			scene = new JTopo.Scene();	
+			scene.background = './img/bg.jpg';
+			drawNode(scene);
+			stage.add(scene);
+		}
+				
+		$(document).ready(show);					
+		
+		function changeLayout(select){			
+			layout = select.value;
+			drawNode();
+		}
+		
+		function changeCloudLink(select){
+			cloudLink = select.value;
+			drawNode();
+		}
+		function changeHostLink(select){
+			hostLink = select.value;
+			drawNode();
+		}
+		
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+				<p>&nbsp;</p>
+				布局:&nbsp;
+				  <select onchange="changeLayout(this)">
+					<option value="tree">树形</option>
+					<option value="round">圆形</option>					
+				  </select>
+				  &nbsp;&nbsp;
+				  一级连线:
+				  <select onchange="changeCloudLink(this)">
+					<option value="Link">直线</option>
+					<option value="FoldLink">折线</option>					
+				  </select>
+				  &nbsp;&nbsp;
+				  二级连线：
+				  <select onchange="changeHostLink(this)">
+					<option value="Link">直线</option>
+					<option value="FoldLink">折线</option>										
+				  </select>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

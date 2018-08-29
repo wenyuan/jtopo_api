@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>			
+		$(document).ready(function(){					
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			var scene = new JTopo.Scene();	
+			scene.shadow = false;
+			scene.background = './img/bg.jpg';
+			stage.add(scene);
+			
+			var n = 0;
+			function createNode(rootNode, parentNode){
+				var childs = rootNode.children();
+						
+				for(var i=0; i<childs.length; i++){
+					var e = $(childs[i]);
+					var node = new JTopo.Node('<' + e[0].tagName + '>' + e.text());
+					scene.add(node);
+					
+					var link = new JTopo.Link(parentNode, node);	
+					scene.add(link);
+
+					createNode(e, node);
+				};
+				return parentNode;
+			}
+			var parentNode = new JTopo.Node("DOM树");
+			scene.add(parentNode);
+			
+			var cloudNode = createNode($('.head_nav_second'), parentNode);
+			
+			
+			var treeLayout = {
+				direction: 'bottom',
+				height: 90,
+				width: 38,
+				getOffset: function(x, y, index, count){
+					return {x: this.width, y: 0};
+				},
+				getCenterLocation: function(childs){
+					var left = childs[0].getCenterLocation();
+					if(childs.length == 1){
+						return {x : left.x,	y: left.y - this.height}
+					}else{
+						var right = childs[childs.length - 1].getCenterLocation();
+						return {
+							x : (left.x + right.x) / 2,
+							y: left.y - this.height
+						}
+					}  
+				}
+			};
+			
+			function getTreeDeep(scene, rootNode){
+				var maxDeep = 0;
+				function iterator(scene, rootNode, deep){
+					var childs = JTopo.layout.getNodeChilds(scene, rootNode);
+					if(maxDeep < deep){
+						maxDeep = deep;
+					}
+					for(var i=0; i<childs.length; i++){
+						iterator(scene, childs[i], deep+1);
+					}
+				}
+				iterator(scene, rootNode, 0);
+				return maxDeep;
+			}
+			
+		
+			function layoutNode(scene, rootNode, layout, deep, maxDeep, x, y){
+				var childs = JTopo.layout.getNodeChilds(scene, rootNode);
+				if(x == null){
+					x = rootNode.x;
+					y = rootNode.y;
+				}
+				
+				for(var i=0; i<childs.length; i++){
+					var offset = layout.getOffset();
+					var dx = offset.x;
+					var dy = offset.y;
+					
+					var c = layoutNode(scene, childs[i], layout, deep+1, maxDeep, x + dx, y + dy);	 
+					x = c.x;
+					//y = c.y;
+				}
+	
+				if(childs.length > 0){
+					var childsCenterLocation = layout.getCenterLocation(childs);
+					rootNode.setCenterLocation(childsCenterLocation.x , childsCenterLocation.y);
+					return childs[childs.length-1].getLocation();
+				}else{
+					var offset = layout.getOffset();
+					var dx = offset.x;
+					var dy = offset.y;
+					var childsCenterLocation = {x:x+ dx, y:y - (3 - deep) * treeLayout.height};
+					rootNode.setCenterLocation(childsCenterLocation.x, childsCenterLocation.y);
+					return childsCenterLocation;
+				}
+			}
+			
+			var maxDeep = getTreeDeep(scene, cloudNode);
+			layoutNode(scene, cloudNode, treeLayout, 0, maxDeep);
+			
+				
+			function translateNode(scene, node, dx, dy){
+				var childs = JTopo.layout.getNodeChilds(scene, node);
+				for(var i=0; i<childs.length; i++){
+					translateNode(scene, childs[i], dx, dy);		
+				}
+				node.x += dx;
+				node.y += dy;
+			}
+			
+			var dx = canvas.width/2 - cloudNode.x;
+			var dy = canvas.height/2 - cloudNode.y;
+			
+			translateNode(scene, cloudNode, dx, dy - 120);
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

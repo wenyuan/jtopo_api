@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<meta name="Viewport" content="width=device-width; user-scaleable=no; initial-scale=1.0"/>
+
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>			
+		function randomFruit(){
+			var fruits = ['sandia','apple','basaha','peach','banana', 'boom'];
+			return fruits[Math.floor(Math.random()*fruits.length)];
+		}
+		// 音乐控制
+		function playSound(sound, volume){
+			var s = document.getElementById(sound + '_audio');
+			s.volume = volume ? volume : 0.6;
+			s.play();
+		}
+		function stopSound(sound){
+			document.getElementById(sound+ '_audio').pause();
+		}
+		// 最高分记录
+		function getBestScore(){
+			var score = localStorage.getItem('best');
+			if(score == null){
+				score = 0;
+			}else{
+				score = parseInt(score);
+			}
+			return score;
+		}
+		function updateBestScore(newBest){
+			localStorage.setItem('best', newBest);
+		}
+		
+		$(document).ready(function(){					
+			var stage = new JTopo.Stage(canvas);
+			var scene = new JTopo.Scene(stage);
+			//显示工具栏
+			showJTopoToobar(stage);
+			scene.background = './img/fruit/background.jpg';
+			scene.mode = 'select';
+			scene.areaSelect = false;
+			
+			
+			function isBoom(node){
+				return node.image.src.indexOf('boom') != -1;
+			}
+			
+			var isGameOver = false;
+			
+			//游戏开始
+			function startGame(){
+				isGameOver = false;
+				scene.clear();	
+				stopSound('menu');				
+				playSound('start');
+				
+				var nodes = [];			
+				for(var i=0; i<3; i++){
+					var node = new JTopo.Node();
+					var fruit = randomFruit();
+					node.setImage('./img/fruit/'+fruit+'.png', true);	
+					node.showSelected = false;
+					node.isFruit = true;					
+					scene.add(node);
+					nodes.push(node);
+				}
+				
+				var score = 0;
+				
+				var scoreIcon = iconNode('score.png', 10, 10);			
+				var scoreNode = new JTopo.TextNode('0');
+				scoreNode.font = '18pt';
+				scoreNode.strokeColor = '255,255,0';
+				scoreNode.setLocation(60, 24);
+				scene.add(scoreNode);
+				
+				var bestScoreNode = new JTopo.TextNode('Best :' + getBestScore());
+				bestScoreNode.fontSize = '18pt';
+				bestScoreNode.strokeColor = '255,255,0';
+				bestScoreNode.setLocation(10, 60);
+				scene.add(bestScoreNode);
+				
+				var lose = 0;
+				var loseIcon = iconNode('lose.png', 530, 10);			
+				var loseNode = new JTopo.TextNode('0');
+				loseNode.fontSize = '18pt';
+				loseNode.strokeColor = '255,255,0';
+				loseNode.setLocation(590, 22);
+				scene.add(loseNode);
+
+				scene.mousemove(function(e){
+					var node = e.target;
+					if(node == null || !node.isFruit) {
+						return;
+					}
+					if(isGameOver) return;
+					if(isBoom(node)){	
+						isGameOver = true;
+						playSound('boom', 1);
+						JTopo.Animate.stopAll();
+						JTopo.Animate.scale(node, {scale: 2, context:scene}).run().onStop(function(n){
+							scene.clear();							
+							JTopo.Animate.startAll();
+							GameOver();
+						});												
+					}else{
+						scoreNode.text = (++score);
+						if(score > getBestScore()){
+							updateBestScore(score);
+							bestScoreNode.text = ('Best :' + score);
+						}
+						playSound('splatter');
+						var angle = Math.atan2(node.y - e.y, node.x - e.x);
+						node.overX = null;
+						node.overY = null;
+						//切成两半
+						JTopo.Animate.dividedTwoPiece(node, {angle: angle, context:scene}).run().onStop(function(n){
+							var fruit = randomFruit();			
+							node.setImage('./img/fruit/'+fruit+'.png', true);
+						});
+					}
+				});
+				
+				for(var i=0; i<nodes.length; i++){
+					var node = nodes[i];
+					//不停的向往抛
+					var e = JTopo.Animate.repeatThrow(node, {context:scene}).run()
+						.onStop(function(n){						
+						if(n.visible == true){
+							if(! isBoom(n)){																
+								loseNode.text = (++lose);							
+								iconNode('lose.png', n.x, n.y - 60);
+								if(lose > 3){
+									playSound('over');								
+									GameOver();								
+								}
+							}else{
+								var fruit =  randomFruit();			
+								n.setImage('./img/fruit/'+fruit+'.png', true);
+							}
+						}					
+						playSound('throw');
+					});
+					//旋转着
+					JTopo.Animate.rotate(node, {context:scene}).run();
+				}				
+			}						
+			
+			// 在指定位置显示图像节点
+			function iconNode(image, x, y, isMenu){
+				var node = new JTopo.Node();
+				node.setImage('./img/fruit/' + image, true);
+				node.setLocation(x, y);
+				scene.add(node);
+				//node.isSelected = function(){ return false;	};
+				//node.isFocus = function(){return false;	};
+				node.isMenu = isMenu;
+				node.dragable = false;
+				node.showSelected = false;
+				return node;
+			}
+			
+			// 游戏结束
+			function GameOver(){
+				isGameOver = true;
+				JTopo.Animate.stopAll();
+				setTimeout(function(){
+					scene.clear();
+					JTopo.Animate.startAll();
+					var overNode = iconNode('game-over.png', 60, -100);
+					JTopo.Animate.move(overNode, {context:scene, position:{x:60, y:200}}).run();
+					setTimeout(function(){location.href = location.href}, 3000);
+				}, 1000);				
+			}
+			
+			// 进入游戏主菜单
+			function showMenu(){
+				scene.clear();
+				playSound('menu');
+				var headBgNode = iconNode('home-mask.png', 0, -300);
+				JTopo.Animate.move(headBgNode, {context:scene, position:{x:0, y:0}}).run();
+				
+				var logoNode = iconNode('logo.png', 14, -600);				
+				JTopo.Animate.move(logoNode, {context:scene, position:{x:14, y:2}}).run();
+				
+				var ninjaNode = iconNode('ninja.png', 320, -900);
+				JTopo.Animate.move(ninjaNode, {context:scene, position:{x:320, y:40}}).run();
+				
+				var homeDescNode = iconNode('home-desc.png', -1000, 127);								
+				JTopo.Animate.move(homeDescNode, {context:scene, position:{x:16, y:127}}).run();
+				
+				setTimeout(function(){				
+					var peachNode = iconNode('peach.png', 91, 306, true);				
+					var dojoNode = iconNode('dojo.png', 34, 248);						
+					JTopo.Animate.rotate(dojoNode, {context:scene, v: -0.01}).run();
+					JTopo.Animate.rotate(peachNode, {context:scene, v: 0.03}).run();	
+					
+					var newGameNode = iconNode('new-game.png', 239, 220);				
+					var sandiaNode = iconNode('sandia.png', 289, 275, true);						
+					JTopo.Animate.rotate(sandiaNode, {context:scene, v: 0.04}).run();
+					JTopo.Animate.rotate(newGameNode, {context:scene, v: 0.01}).run();	
+					
+					// 晃动的New
+					var newNode = iconNode('new.png', 148, 213);
+					JTopo.Animate.cycle(newNode, {context:scene, p1:{x:34, y:190}, p2:{x:34, y:200}}).run();	
+
+					var quitNode = iconNode('quit.png', 485, 303);
+					var boomNode = iconNode('boom.png', 521, 333, true);	
+					JTopo.Animate.rotate(quitNode, {context:scene, v: 0.02}).run();	
+					// 切开菜单开始
+					scene.mousemove(function(e){
+						var node = e.target;
+						if(node == null) return;
+						if(!node.isMenu || node.visible == false) {
+							return;
+						}
+						playSound('splatter');
+						//切成两半
+						JTopo.Animate.dividedTwoPiece(node, 
+							{angle:Math.atan2(node.y - e.y, node.x - e.x), context:scene}).run().onStop(function(n){						
+							startGame();
+						});									
+					});
+				}, 1500);
+			}
+			
+			showMenu();					
+		});	
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="640" height="480" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+	<audio id="throw_audio">
+        <source src="./sound/throw.ogg">
+    </audio>
+	<audio id="splatter_audio">
+        <source src="./sound/splatter.ogg">
+    </audio>
+	<audio id="start_audio">
+        <source src="./sound/start.ogg">
+    </audio>
+	<audio id="menu_audio">
+        <source src="./sound/menu.ogg">
+    </audio>
+	<audio id="over_audio">
+        <source src="./sound/over.ogg">
+    </audio>	
+	<audio id="boom_audio">
+        <source src="./sound/boom.ogg">
+    </audio>  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

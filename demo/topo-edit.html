@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>				
+		$(document).ready(function(){					
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			var scene = new JTopo.Scene();	
+			//scene.background = './img/bg.jpg';
+			
+			var toolContainer = new JTopo.Container();
+			toolContainer.fillStyle = '255,255,255';
+			toolContainer.dragable = false;
+			toolContainer.setLocation(0, 0);				
+			toolContainer.setSize(160, scene.height);
+			toolContainer.layout = {type:'grid', rows:6, cols: 2, horizontal: 120, vertical: 70};
+			scene.add(toolContainer);
+			
+			function addToolNode(img){
+				var node = new JTopo.Node(img, true);
+				node.setImage('./img/pstn/' + img  + '.png', true);			
+				toolContainer.add(node);
+				scene.add(node);												
+			}
+			
+			var nodes = ['cloud', 'line', 'terminal', 'msc', 'router'];
+			for(var i=0; i<nodes.length; i++){
+				addToolNode(nodes[i]);
+			}
+			
+			var container = new JTopo.Container();
+			//container.dragable = false;
+			container.visible = false;
+			container.setLocation(101, 0);				
+			container.setSize(scene.width-190, scene.height);			
+			scene.add(container);									
+			
+			var toolNode = null;
+			for(var i=0; i<toolContainer.items.length; i++){
+				var node = toolContainer.items[i];		
+				node.addEventListener('mousedown', function(e){				
+					toolNode = e.target;
+					nodeA = null;
+					scene.clearOperations();
+				});
+			}
+			
+			var nodeA = null;
+			scene.addEventListener('mousedown', function(e){
+				if(e.target == null || !e.target.byCreate || nodeA) return;
+				if(toolnode.text != 'line') return;
+				if(e.target === container){
+					toolNode = e.target;
+					nodeA = null;
+					scene.clearOperations();
+					return;
+				}
+				
+				nodeA = e.target;
+			});
+			scene.addEventListener('onMousemove', function(e){				
+				if(nodeA == null) return;
+				scene.clearOperations().addOperation(function(g){		
+					g.beginPath();
+					g.strokeStyle = 'rgba(255,255,0,1)';
+					g.fillStyle = 'rgba(0,0,236,0.9)';
+					g.moveTo(nodeA.getCenterXY().x, nodeA.getCenterXY().y);
+					g.lineTo(e.x , e.y);
+					g.stroke();
+					g.closePath();
+				});
+			});
+			scene.addEventListener('mouseup', function(e){		
+				if(! toolNode) return;
+				if(nodeA && nodeA !== e.target){
+					scene.add(new JTopo.Link(nodeA, e.target));
+					nodeA = e.target;
+					//toolNode = null;
+				}else if(e.target === container){				
+					var node = new JTopo.Node();
+					node.byCreate = true;
+					node.setImage(toolNode.image, true);
+					node.setLocation(e.x-toolNode.width/2, e.y-toolNode.height/2);
+					container.add(node);
+					scene.add(node);
+				}
+			});
+			
+								
+			stage.add(scene);
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

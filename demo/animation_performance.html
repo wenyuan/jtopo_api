@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo 动画测试</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库 性能测试">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology 性能测试">	
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>
+		$(document).ready(function(){								
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			var scene = new JTopo.Scene(stage);
+			scene.background = './img/bg.jpg';
+	
+			// 节点数量
+			var nodeCount = 3000; 
+			
+			// 生成随机坐标
+			function randomCoor(range){
+				return Math.random()* range - Math.random() * range;
+			}
+			
+			function createNode(x, y, text){
+				var node = new JTopo.Node();
+				node.radius = 4;
+				node.showSelected = false;
+				node.shadow = false;
+				node.setSize(12, 12);
+				node.textPosition = "Middle_Center";
+				node.alpha = Math.random();
+				node.setLocation(x, y);	
+				node.fillColor = '255,255,255';
+				scene.add(node);
+				if(Math.random() < 0.1){
+					if(Math.random() < 0.3){
+						node.setImage('./img/cloud.png');
+					}
+					//node.text = text;
+					JTopo.Animate.stepByStep(node, 
+						{alpha: 0.1,
+							rotate:  (Math.random()-Math.random()) *2*Math.PI,
+							scaleX: Math.random() * 10,
+							scaleY: Math.random() * 10
+						}, 1000 + 4000 * Math.random(), true).start();
+				}
+				if(Math.random() < 0.06){
+					node.fillColor = '255,0,0';
+				}
+				return node;
+			}
+			
+			var beginTime = (new Date()).getTime();
+			var r = 25;
+			var angle = 0;
+			var da = 0.1;
+			var rootNode = null;
+			
+			// 每次循环创建两个节点
+			for(var i= 0; i<nodeCount; i++){
+				var x = canvas.width/2 + r * Math.cos(angle);
+				var y = canvas.height/2 + r * 0.7 * Math.sin(angle);			
+				var nodeFrom = createNode(x, y, i);
+				
+				var x2 = x + 5 + 10 * Math.random();
+				var y2 = y;
+				var nodeTo =  createNode(x2, y2, i);
+				
+				angle += da;
+				r += 0.5;
+				if(angle > 2*Math.PI){
+					angle = 0;
+					da -= Math.random();
+					if(Math.random() > 0.5){
+						da = -da;
+					}
+				}
+			}
+
+		});
+	</script>	
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>		
+		<div class="content">			
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

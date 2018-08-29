@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>				
+		$(document).ready(function(){										
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			stage.frames = -24;
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			var scene = new JTopo.Scene(stage);	
+			scene.background = './img/bg.jpg';
+			
+			// 节点
+			function newNode(x, y, w, h, text){
+				var node = new JTopo.Node(text);
+				node.setLocation(x, y);
+				node.setSize(w, h);
+				scene.add(node);
+				return node;
+			}
+			
+			// 简单连线
+			function newLink(nodeA, nodeZ, text,dashedPattern){
+				var link = new JTopo.Link(nodeA, nodeZ, text);		
+				link.lineWidth = 3; // 线宽
+				link.bundleOffset = 60; // 折线拐角处的长度
+				link.bundleGap = 20; // 线条之间的间隔
+				link.textOffsetY = 3; // 文本偏移量（向下3个像素）
+				link.strokeColor = JTopo.util.randomColor(); // 线条颜色随机
+				link.dashedPattern = dashedPattern; 
+				scene.add(link);
+				return link;
+			}
+			
+			var fromNode = newNode(100, 80, 60, 60, 'from');
+			var node = newNode(360, 250, 60, 60, 'to');
+
+			for(var i=0; i<5; i++){
+				newLink(fromNode, node, 'Link' + i);		
+			}
+			newLink(fromNode, node, 'last', 5);
+			
+			// ---------- FoldLink
+			function newFoldLink(nodeA, nodeZ, text, direction, dashedPattern){
+				var link = new JTopo.FoldLink(nodeA, nodeZ, text);
+				link.direction = direction || 'horizontal';
+				link.arrowsRadius = 15; //箭头大小
+				link.lineWidth = 3; // 线宽
+				link.bundleOffset = 60; // 折线拐角处的长度
+				link.bundleGap = 20; // 线条之间的间隔
+				link.textOffsetY = 3; // 文本偏移量（向下3个像素）
+				link.strokeColor = JTopo.util.randomColor(); // 线条颜色随机
+				link.dashedPattern = dashedPattern; 
+				scene.add(link);
+				return link;
+			}
+			
+			var fromNode = newNode(100, 320, 60, 60, 'from');	
+			var node = newNode(300, 470, 60, 60, 'to');
+			
+			newFoldLink(fromNode, node, 'up');
+			newFoldLink(fromNode, node, 'down', 'vertical');
+
+
+			// -----------FlexionalLink
+			function newFlexionalLink(nodeA, nodeZ, text, dashedPattern){
+				var link = new JTopo.FlexionalLink(nodeA, nodeZ, text);
+				link.arrowsRadius = 10;
+				link.lineWidth = 3; // 线宽
+				link.offsetGap = 30;
+				link.bundleGap = 15; // 线条之间的间隔
+				link.textOffsetY = 10; // 文本偏移量（向下15个像素）
+				link.strokeColor = JTopo.util.randomColor(); // 线条颜色随机
+				link.dashedPattern = dashedPattern; 
+				scene.add(link);
+				return link;
+			}
+			var fromNode = new JTopo.Node('from');
+			fromNode.setSize(60, 60);
+			fromNode.setLocation(500, 60);
+			scene.add(fromNode);
+			
+			var node = new JTopo.Node("to");	
+			node.setSize(60, 60);
+			node.setLocation(545, 220);
+			scene.add(node);
+			
+			for(var i=0; i<2; i++){
+				newFlexionalLink(fromNode, node, 'u' + i, 3);
+				newFlexionalLink(node, fromNode);
+			}
+			
+			// --------- loop
+			var loopNode = new JTopo.Node("loop");		
+			loopNode.setLocation(600, 400);
+			scene.add(loopNode);
+			for(var i=0; i<3; i++){
+				var link = new JTopo.Link(loopNode, loopNode);
+				link.text = 'L'+i;
+				link.lineWidth = 3; // 线宽
+				link.bundleGap = 30; // 线条之间的间隔
+				link.textOffsetY = 3; // 文本偏移量（向下3个像素）
+				link.strokeColor = JTopo.util.randomColor(); // 线条颜色随机
+				link.type = 'loop'; // 自定义属性
+				scene.add(link);
+			}
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

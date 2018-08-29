@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">	
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+	
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+	
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+	
+	<script id='code'>				
+		$(document).ready(function(){					
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+			//显示工具栏
+			showJTopoToobar(stage);
+
+			var scene = new JTopo.Scene();
+			scene.shadow = false;
+			scene.setBackground('./img/war/bg.png');
+						
+			var sprite = new JTopo.AnimateNode('./img/effect/caizhu.png', 1, 4, 1000, 1);					
+			sprite.setSize(90, 88);
+			sprite.setLocation(300, 250);								
+			sprite.repeatPlay = true;			
+			sprite.play();
+			scene.add(sprite);
+			
+			var catLife = new JTopo.Node();
+			catLife.width = 270;
+			catLife.height = 10;
+			catLife.fillStyle = '255,0,0';
+			catLife.setLocation(56, 31);			
+			catLife.dragable = false
+			scene.add(catLife);
+			
+			var dogLife = new JTopo.Node();
+			dogLife.width = 270;
+			dogLife.height = 10;
+			dogLife.fillStyle = '255,0,0';
+			dogLife.setLocation(476, 31);			
+			//catLife.dragable = false
+			scene.add(dogLife);
+			
+			var catNode = new JTopo.Node();
+			catNode.setLocation(28,322);
+			catNode.setImage('./img/war/cat.png', true);
+			catNode.dragable = false
+			scene.add(catNode);
+			
+			var dogNode = new JTopo.Node();
+			dogNode.setLocation(664,377);
+			dogNode.dragable = false
+			dogNode.setImage('./img/war/dog.png', true);
+			scene.add(dogNode);
+			
+			function ballNode(){
+                var node = new JTopo.CircleNode("Hello");                            
+                node.fillStyle='255,255,255';
+                node.startAlpha = 1;
+                node.endAlpha = 0;
+                node.radius = 30;            
+                node.setSize(node.radius * 2, node.radius * 2);                        
+                node.paint = function(g){
+                    var r = this.radius;
+                    
+                    var rg = g.createRadialGradient(0, 0, 1, 0, 0, r); 
+                    rg.addColorStop(0, 'rgba(255,255,255,'+this.startAlpha+')');                
+                    rg.addColorStop(1, 'rgba(255,255,255,'+this.endAlpha+')');                     
+                    g.fillStyle = rg;
+                    g.beginPath();
+                    g.arc(0, 0, r, 0, 2*Math.PI, true);
+                    g.fill();
+                    g.closePath();
+                };
+                scene.add(node);
+                return node;
+            }
+			var ball = ballNode();
+			ball.showSelected = false;
+			ball.setLocation(0,0);	
+			ball.dragable = false;			
+			scene.add(ball);
+			ball.visible = false;
+			
+			var images = [];
+            for(var i=1; i<=13; i++){
+                images.push('./img/effect/down/'+ i + '.png');;
+            }
+            
+            var effectNode = new JTopo.AnimateNode(images, 1000, true);                                    
+            effectNode.visible = false;
+            effectNode.showSelected = false;
+            effectNode.dragable = false;
+			effectNode.x = 1000;
+			
+			
+			
+			 function myNode(text, x, y){
+                var node = new JTopo.Node(text);
+                node.percent = 0.2;
+                node.beginDegree = 0;
+                node.width = node.height = 50;
+                node.setLocation(x, y);
+                node.textPosition = "Middle_Center";
+                node.paint = function(g){
+					if(!this.visible) return;
+                    g.beginPath();
+                    g.moveTo(0,0);
+                    g.fillStyle = 'rgba(255,0,0,' + this.alpha + ')';
+                    g.arc(0, 0, this.width/2, this.beginDegree, this.beginDegree + 2*Math.PI*this.percent);
+                    g.fill();                
+                    g.closePath();
+                    
+                    g.save();
+                    g.beginPath();
+                    g.fillStyle = 'rgba(255,255,255,' + this.alpha + ')';
+                    g.moveTo(0,0);
+                    g.arc(0, 0, this.width/2-8, this.beginDegree, this.beginDegree + 2*Math.PI);                
+                    g.fill();
+                    g.closePath();                                
+                    g.restore();                                    
+                    this.drawText(g);
+                };
+                scene.add(node);
+                return node;
+            }			
+			var power = myNode('',29,370);
+			power.dragable = false;		
+			power.visible = false;
+			scene.add(power);
+			
+			var flag = false;
+			var timer = null;
+			dogNode.addEventListener('mousedown', function(event){
+				if(flag) return;				
+				window.clearInterval(timer);			
+				power.visible = true;
+				power.setLocation(dogNode.x, dogNode.y - power.height);
+				timer = setInterval(function(){
+					power.percent += 0.06;
+					if(power.percent > 1){
+						window.clearInterval(timer);
+						power.percent = 1;						
+					}					
+				}, 100);
+			});
+			dogNode.addEventListener('mouseup', function(event){
+				if(flag) return;
+				flag = true;
+				window.clearInterval(timer);				
+				ball.visible = true;
+				ball.setCenterLocation(power.x+power.width/2, power.y+power.height/2);			
+				var midx = (dogNode.x + catNode.x) / 2 + 200 - 400 * power.percent;
+				var midy = 100;
+				JTopo.Animate.stepByStep(ball, {
+					x:midx,
+					y:midy
+				}, 1000).start().onStop(function(){
+					var endX = midx - (dogNode.x - midx);
+					JTopo.Animate.stepByStep(ball, {
+						x: endX,
+						y: 322
+					}, 1000).start().onStop(function(){
+						power.percent = 0.01;
+						ball.visible = false;						
+						effectNode.setCenterLocation(ball.x, ball.y);
+						effectNode.play();
+						setTimeout(function(){
+							effectNode.setLocation(1000,0);
+						}, 1500);
+						ball.setLocation(0,0);
+						catLife.width -=20;
+						flag = false;
+					});
+				});
+				power.percent = 0.01;
+				power.visible = false;			
+			});
+			
+			catNode.addEventListener('mousedown', function(event){
+				if(flag) return;				
+				window.clearInterval(timer);
+				power.visible = true;
+				power.setLocation(catNode.x + power.width, catNode.y - power.height);
+				timer = setInterval(function(){
+					power.percent += 0.06;
+					if(power.percent > 1){
+						window.clearInterval(timer);
+					}
+					ball.setLocation(0,0);
+				}, 100);
+			});
+			catNode.addEventListener('mouseup', function(event){
+				if(flag) return;
+				flag = true;
+				window.clearInterval(timer);
+				power.visible = false;
+				
+				ball.visible = true;
+				ball.setCenterLocation(power.x+power.width/2, power.y+power.height/2);
+				
+				var midx = (dogNode.x + catNode.x) / 2 -100 + 200 * power.percent;
+				var midy = 100;
+				JTopo.Animate.stepByStep(ball, {
+					x:midx,
+					y:midy
+				}, 1000).start().onStop(function(){
+					var endX = midx + (midx - catNode.x);
+					JTopo.Animate.stepByStep(ball, {
+						x:endX,
+						y:322
+					}, 1000).start().onStop(function(){					
+						power.percent = 0.01;
+						ball.visible = false;						
+						effectNode.setCenterLocation(ball.x, ball.y);
+						effectNode.play();
+						setTimeout(function(){
+							effectNode.setLocation(1000,0);
+						}, 1500);
+						ball.setLocation(0,0);
+						dogLife.width -= 20;
+						dogLife.x += 20;	
+						flag = false;
+					});
+				});
+				power.percent = 0.01;
+			});
+			scene.add(effectNode); 
+			effectNode.play();
+			stage.add(scene);
+		});
+	</script>
+  </head>
+
+  <body>
+
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>		
+		<div class="head_nav_second">			
+			<ul class="menu" id="nav_menu">
+			
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+			
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">					<canvas width="850" height="550" id="canvas"></canvas>	
+					
+				</div>				
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+  
+	<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1000418207'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/z_stat.php%3Fid%3D1000418207%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+
+</html>

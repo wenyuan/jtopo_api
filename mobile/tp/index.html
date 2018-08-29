@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script type="text/javascript" src="js/jquery-1.9.1.min.js" ></script>
+	<script type="text/javascript" src="js/jtopo-0.4.7-min.js" ></script>
+    <title>hello world</title>
+    <script type="text/javascript">
+    </script>
+</head>
+<body >
+	<div id="consoleDiv" >
+		<a href="#" onclick="testEvent();" >test</a>
+		console
+	</div>
+	<div>
+		<canvas id="myCanvas" width="300" height="300" style="background-color: yellowgreen;"></canvas>
+	</div>
+</body>
+
+<script>
+	$(document).ready(function(){
+	    var canvas = document.getElementById('myCanvas');            
+        var stage = new JTopo.Stage(canvas);
+    
+        var scene = new JTopo.Scene(stage);
+         
+        var node = new JTopo.Node("Hello");                            
+        node.setLocation(100, 100);
+        scene.add(node);
+         
+        document.addEventListener('touchstart',touch);
+	    document.addEventListener('touchmove',touch);
+	    document.addEventListener('touchend',touch);
+	});
+	
+	function touch (event){
+        var event = event || window.event;
+        //outC(event.type);
+        
+        if(event.type == 'touchstart'){
+        	mouseEvent(event,"mousedown");
+        }else if(event.type == 'touchmove'){
+        	mouseEvent(event,"mousemove");
+        }if(event.type == 'touchend'){
+        	mouseEvent(event,"mouseup");
+        }
+    }
+	
+	
+ 
+	
+	function mouseEvent(e,type){
+	   var btn = document.getElementById("myCanvas"); 
+	　　var event = document.createEvent("MouseEvents"); 
+	   var x = e.changedTouches[0].clientX;
+	   var y = e.changedTouches[0].clientY;
+	　　event.initMouseEvent(type, true, true, document.defaultView, 0,x, y, x, y,false, false, false, false, 0, null); 
+	　　btn.dispatchEvent(event); 
+	}
+	
+	
+	function outC(msg){
+		$('#consoleDiv').html(msg);
+	}
+	
+	function testEvent(e){
+		alert(e);
+	   var btn = document.getElementById("myCanvas"); 
+	　　var event = document.createEvent("MouseEvents"); 
+ 
+	　　event.initMouseEvent("mousedown", true, true, document.defaultView, 0,120, 130, 120, 130,false, false, false, false, 0, null); 
+	　　btn.dispatchEvent(event); 
+	}
+</script>
+</html>

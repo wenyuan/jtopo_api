@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9"/>
+	<title>jTopo Demo</title>
+	<meta name="description" content="jTopo免费的基于HTML5 Canvas的网络拓扑、关系图形库">
+	<meta name="keyword" content="jTopo 网络 拓扑 图形库 HTML5 Canvas 免费 关系图形库 javascript topology">
+
+	<link rel="stylesheet" type="text/css" href="../css/base.css">
+	<link href="../css/jquery.snippet.min.css" rel="stylesheet">
+
+	<script src="../js/jquery.js"></script>
+	<script src="../js/site.js"></script>
+	<script src="../js/demo.js"></script>
+
+	<script type="text/javascript" src="js/snippet/jquery.snippet.min.js"></script>
+	<script type="text/javascript" src="js/jtopo-min.js"></script>
+	<script type="text/javascript" src="js/toolbar.js"></script>
+
+	<script id='code'>
+		$(document).ready(function(){
+			var canvas = document.getElementById('canvas');
+			var stage = new JTopo.Stage(canvas);
+
+			showJTopoToobar(stage);
+			var scene = new JTopo.Scene(stage);
+			scene.backgroundColor = '21,21,21';
+			scene.alpha = 1;
+
+			
+			// 乌龟每走一步留下的脚印被解释为: 在x，y处增加一个节点
+			var tortoise = new Logo.Tortoise(function(x, y){
+                var node = new JTopo.CircleNode();
+                node.fillColor = '255,255,255';
+                node.radius = 5;				
+                node.setCenterLocation(x, y);
+                scene.add(node);
+            });
+			
+			// 步长缩放20倍，即：两个脚印相隔20个像素（默认为1个像素）
+			tortoise.resize(20);
+						
+			// 爬出一条直线
+			function line(t, n){
+				for(var i=0; i<n; i++){
+					t.forward(1);
+				}
+			}
+			
+			tortoise.moveTo(200, 400);
+			line(tortoise, 10);
+			
+			// 方形
+			function rectangle(t){						
+				// 向前走一步
+				t.forward(1);				
+				// 旋转90度			
+				t.turn(Math.PI/2);
+				// 向前走一步
+				t.forward(1);
+				
+				t.turn(Math.PI/2);			
+				t.forward(1);
+				
+				t.turn(Math.PI/2);			
+				t.forward(1);
+			}
+			
+			// 先移动到画布中间
+			tortoise.moveTo(canvas.width/2, canvas.height/2);
+			rectangle(tortoise);
+					
+			
+			// 按圆形
+			function circle(t, n){
+				var angle = 2*Math.PI / n;
+				for(var i=0; i<n; i++){
+					t.forward(1);
+					t.turn(angle);
+				}
+			}
+			
+			tortoise.moveTo(500, 200);
+			circle(tortoise, 10);
+		});
+
+	</script>
+  </head>
+
+  <body>
+	<center>
+	<div class="wrap_div">
+		<div class="head_nav">
+			<h2 class="logo"><a href="index.html" title="jTopo">jTopo</a></h2>
+		</div>
+		<div class="head_nav_second">
+			<ul class="menu" id="nav_menu">
+
+			</ul>
+		</div>
+		<div class="content">
+		  <div class="left">
+			<ul id="menu">
+
+			</ul>
+		  </div>
+		  <div class="right">
+				<div id="content">
+					<canvas width="850" height="550" id="canvas"></canvas>
+
+				</div>
+		  </div>
+		  <div class="clear"></div>
+		</div>
+	</div>
+	</center>
+	<div class="footer">
+		&nbsp;
+	</div>
+
+</body>
+
+</html>
