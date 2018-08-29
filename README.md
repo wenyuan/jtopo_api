@@ -2,7 +2,7 @@
 > 基于jtopo原官方网站的维护，感谢原作者莫言。</br>
 
 ## jTopo原站点
-[jTopo官方网站](http://www.jtopo.com/)
+[jTopo官方网站](http://www.jtopo.com/)，最近无法访问。
 
 ## 关于jTopo
 jTopo的原作者是莫言（网名），官方网站：[http://www.jtopo.com](http://www.jtopo.com/)， </br>
@@ -10,7 +10,7 @@ jTopo的原作者是莫言（网名），官方网站：[http://www.jtopo.com](h
 
 ## 关于本项目
 本项目主要是原JTopo官方网站的快照， </br>
-因为原作者暂时停止了对官网jtopo的更新，同时近期jtopo的官网已无法访问，要查阅api等信息，目前可到快照查询。
+因为原作者暂时停止了对官网jtopo的更新，同时近期jtopo的官网已无法访问，要查阅api等信息，可到该快照查询。
 
 ## 关于对jTopo的维护
 原作者的最近一次更新是 jtopo-0.4.8，这个版本经过多次迭代，算是比较稳定的一个版本了。 </br>
