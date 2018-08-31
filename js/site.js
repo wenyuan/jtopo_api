@@ -6,8 +6,7 @@
 		{title:'API 文档', href:'api.html'},
 		{title:'五分钟入门', href:'introduction-in-5-minutes.html'},
 		{title:'在线演示', href:'demo/helloworld.html'},
-		{title:'捐赠', href:'donate.html', tip:'觉得还不错？捐点小钱儿支持我的开发吧！', target:'_blank'}		
-		//https://me.alipay.com/jtopo
+		{title:'鼓励一下', href:'donate.html', target:'_blank'}
 	];
 
 	function drawMenus(menus){
