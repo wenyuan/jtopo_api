@@ -5,7 +5,7 @@
 [jTopo原官方网站](http://www.jtopo.com/)，最近无法访问。
 
 ## jTopo现站点
-[jTopo现在维护的网站](http://www.jtopo.cn:8080/)，该站点由个人出资维护，方便查询api和基础demo。后期将慢慢在网站上补充文档，同时更新的代码也会上传上去。
+[jTopo现在维护的网站](http://www.jtopo.cn/)，该站点由个人出资维护，方便查询api和基础demo。后期将慢慢在网站上补充文档，同时更新的代码也会上传上去。
 
 ## 关于jTopo
 jTopo的原作者是莫言（网名），原官方网站：[http://www.jtopo.com](http://www.jtopo.com/)， </br>
@@ -13,7 +13,7 @@ jTopo的原作者是莫言（网名），原官方网站：[http://www.jtopo.com
 
 ## 关于本项目
 本项目主要是原JTopo官方网站的快照， </br>
-因为原作者暂时停止了对官网jtopo的更新，同时近期jtopo的官网已无法访问，要查阅api等信息，可到[该站点](http://www.jtopo.cn:8080/)查询。该站点由个人购买服务器和域名维护，如果我有幸帮助到了您，欢迎您在[赞赏](http://www.jtopo.cn:8080/donate.html)页面扫描二维码给予点滴鼓励。万分感谢！
+因为原作者暂时停止了对官网jtopo的更新，同时近期jtopo的官网已无法访问，要查阅api等信息，可到[该站点](http://www.jtopo.cn/)查询。该站点由个人购买服务器和域名维护，如果我有幸帮助到了您，欢迎您在[赞赏](http://www.jtopo.cn/donate.html)页面扫描二维码给予点滴鼓励。万分感谢！
 
 ## 关于对jTopo的维护
 原作者的最近一次更新是 jtopo-0.4.8，这个版本经过多次迭代，算是比较稳定的一个版本了。 </br>
